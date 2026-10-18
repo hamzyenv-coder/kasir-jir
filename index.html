@@ -1,0 +1,2322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Way's Tea Club / Way's Tea Bojong</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        amberBrand: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        html, body {
+            overscroll-behavior-y: contain;
+            touch-action: manipulation;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            #section-recap {
+                display: block !important;
+            }
+            .shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl {
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col pb-16">
+
+    <header class="bg-brand-700 text-white shadow-lg sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-brand-700 p-2 rounded-xl font-bold text-xl shadow">
+                    <i class="fa-solid font-bold fa-mug-hot"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight sm:text-xl">WAY'S TEA CLUB</h1>
+                    <p class="text-xs text-brand-100">Daftar Penjualan & Kasir Bojong</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="hidden md:flex flex-col text-right">
+                    <span class="text-xs text-brand-200" id="currentDate">Minggu, 18 Okt 2026</span>
+                    <span class="text-sm font-semibold" id="currentTime">12:00 WIB</span>
+                </div>
+                
+                <button onclick="toggleCalculator()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg font-medium text-sm flex items-center space-x-2 shadow transition active:scale-95">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span class="hidden sm:inline">Kalkulator</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 mb-12">
+
+        <!-- SECTION POS -->
+        <section id="section-pos" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 space-y-4">
+                <!-- Filter Category Quick Bar -->
+                <div class="flex items-center space-x-2 overflow-x-auto pb-1 hide-scrollbar" id="categoryFilterBar"></div>
+
+                <div class="max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="menuGrid"></div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 space-y-4">
+                <!-- Turus Teh Card -->
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-mug-hot"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-sm leading-none">Teh per Cup (Turus / Tally)</h3>
+                                <span class="text-[11px] text-amber-700">@ Rp 3.000 / cup</span>
+                            </div>
+                        </div>
+                        <span id="teaQuickCount" class="font-extrabold text-amber-800 text-base">0 Cup</span>
+                    </div>
+
+                    <div id="teaTallyVisual" class="font-mono text-sm font-bold text-amber-800 tracking-wider bg-white rounded-xl p-2.5 border border-amber-200 min-h-[36px] flex flex-wrap gap-1 items-center">
+                        <span class="text-slate-400 text-xs font-sans italic font-normal">Tekan tombol +1 / +5 untuk tambah turus teh</span>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-1.5 pt-1">
+                        <button onclick="addTeaToCart(-5)" class="py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition active:scale-95">-5</button>
+                        <button onclick="addTeaToCart(-1)" class="py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition active:scale-95">-1</button>
+                        <button onclick="addTeaToCart(1)" class="py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>+1</span>
+                        </button>
+                        <button onclick="addTeaToCart(5)" class="py-2 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-layer-group text-[10px]"></i>
+                            <span>+5</span>
+                        </button>
+                        <button onclick="resetTeaTallyInCart()" class="py-2 bg-red-100 hover:bg-red-200 text-red-600 font-semibold rounded-xl text-xs transition">Reset</button>
+                    </div>
+                </div>
+
+                <!-- Keranjang -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col min-h-[380px]">
+                    <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-receipt text-brand-600"></i>
+                            <h2 class="font-bold text-slate-800">Keranjang Pesanan</h2>
+                        </div>
+                        <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium hover:underline">Reset Keranjang</button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3 max-h-[260px]" id="cartList"></div>
+
+                    <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl space-y-3">
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between text-slate-600">
+                                <span>Total Item Cup:</span>
+                                <span id="cartTotalItems" class="font-bold text-slate-800">0 cup</span>
+                            </div>
+                            <div class="flex justify-between text-base font-bold text-slate-900 pt-1 border-t border-slate-200">
+                                <span>Total Harga:</span>
+                                <span id="cartTotalPrice" class="text-brand-700 text-lg">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-2 border-t border-slate-200">
+                            <label class="block text-xs font-semibold text-slate-600">Uang Dibayar (Rp)</label>
+                            <div class="flex space-x-2">
+                                <input type="number" id="paidAmount" oninput="calculateChange()" placeholder="0" class="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
+                                <button onclick="setExactAmount()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-xl transition">Uang Pas</button>
+                            </div>
+                            <div class="grid grid-cols-4 gap-1.5 pt-1">
+                                <button onclick="addMoney(10000)" class="py-1 bg-slate-200 hover:bg-slate-300 rounded text-xs font-medium">+10k</button>
+                                <button onclick="addMoney(20000)" class="py-1 bg-slate-200 hover:bg-slate-300 rounded text-xs font-medium">+20k</button>
+                                <button onclick="addMoney(50000)" class="py-1 bg-slate-200 hover:bg-slate-300 rounded text-xs font-medium">+50k</button>
+                                <button onclick="addMoney(100000)" class="py-1 bg-slate-200 hover:bg-slate-300 rounded text-xs font-medium">+100k</button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center p-2.5 bg-amber-50 rounded-xl border border-amber-200">
+                            <span class="text-xs font-semibold text-amber-800">Kembalian:</span>
+                            <span id="changeDisplay" class="font-bold text-amber-900 text-base">Rp 0</span>
+                        </div>
+
+                        <button onclick="processOrder()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>Proses & Simpan Transaksi</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION STOCK -->
+        <section id="section-stock" class="hidden space-y-6">
+            <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-indigo-900">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-indigo-600 text-white rounded-xl shadow-sm shrink-0">
+                        <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm">Manajemen Stok Awal & Refill Rasa</h3>
+                        <p class="text-xs text-indigo-700">Atur stok awal varian rasa. Foto foto stok di buku untuk otomatis terisi sebagai stok awal!</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <button onclick="openCameraModal()" class="flex-1 md:flex-initial px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center space-x-1.5 shrink-0 active:scale-95">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Foto Stok Buku (AI OCR)</span>
+                    </button>
+                    <button onclick="openBulkStockModal()" class="flex-1 md:flex-initial px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center space-x-1.5 shrink-0 active:scale-95">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Isi Refill / Set Stok Batch</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-cubes text-brand-600 text-lg"></i>
+                        <h2 class="font-bold text-slate-800 text-base">Daftar Stok Varian Rasa Menu</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="stockSearchInput" oninput="renderStockTable()" placeholder="Cari varian rasa..." class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 outline-none">
+                        <button onclick="resetAllStockPrompt()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition" title="Reset stok ke angka default">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Stok
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 border-b">
+                            <tr>
+                                <th class="p-3">Nama Varian Rasa</th>
+                                <th class="p-3">Kategori</th>
+                                <th class="p-3 text-center">Stok Awal</th>
+                                <th class="p-3 text-center">Terjual</th>
+                                <th class="p-3 text-center">Sisa Stok Available</th>
+                                <th class="p-3 text-center">Status Stok</th>
+                                <th class="p-3 text-center">Aksi Refill / Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamic Stock Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION EXPENSES -->
+        <section id="section-expenses" class="hidden space-y-6">
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center space-x-3 text-amber-800">
+                <i class="fa-solid fa-lightbulb text-xl text-amber-600"></i>
+                <p class="text-sm">
+                    <strong>Pencatatan Operasional Kasir:</strong> Atur modal cup awal, cup teh, cup rasa, dan cup pecah untuk melacak sisa stok fisik secara otomatis.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-brand-100 text-brand-700 rounded-lg">
+                                <i class="fa-solid fa-glass-water font-bold"></i>
+                            </div>
+                            <h2 class="font-bold text-slate-800 text-base">Kalkulator Cup & Stok</h2>
+                        </div>
+                        <span class="text-xs text-brand-700 bg-brand-50 border border-brand-200 font-semibold px-2.5 py-1 rounded-lg">Realtime Sync</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">1. Modal Cup Awal</label>
+                            <input type="number" id="inputModalCup" oninput="calculateCupUsage()" value="70" class="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-amber-900 mb-1">2. Cup Teh Terjual</label>
+                            <input type="number" id="inputTehTerjual" oninput="onTehTerjualInputChanged()" value="0" class="w-full p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-sm font-bold text-amber-900 focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-blue-900 mb-1">3. Cup Rasa Terjual</label>
+                            <input type="number" id="inputRasaTerjual" oninput="onRasaTerjualInputChanged()" value="0" class="w-full p-2.5 bg-blue-50 border border-blue-300 rounded-xl text-sm font-bold text-blue-900 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-red-600 mb-1">4. Cup Pecah / Rusak</label>
+                            <input type="number" id="inputCupPecah" oninput="calculateCupUsage()" value="0" class="w-full p-2.5 bg-red-50 border border-red-300 rounded-xl text-sm font-semibold text-red-900 focus:ring-2 focus:ring-red-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">Cup Teh Terjual (@ Rp 3.000):</span>
+                            <span id="displayTehTerjual" class="font-bold text-amber-800">0 cup</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">Cup Rasa Terjual (Berbagai Varian):</span>
+                            <span id="displayRasaTerjual" class="font-bold text-blue-800">0 cup</span>
+                        </div>
+                        <div class="flex justify-between text-sm pt-2 border-t border-slate-200">
+                            <span class="text-slate-700 font-semibold">Total Cup Terjual (Teh + Rasa):</span>
+                            <span id="cupTerjualKasir" class="font-extrabold text-slate-800">0 cup</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-red-600">
+                            <span>Total Cup Terpakai (Terjual + Pecah):</span>
+                            <span id="displayTotalCupTerpakai" class="font-bold">0 cup</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-bold pt-2 border-t border-slate-200">
+                            <span class="text-slate-800">Estimasi Sisa Stok Cup (Modal - Terpakai):</span>
+                            <span id="sisaCupFisikCalculated" class="text-brand-700 text-base">70 cup</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-red-100 text-red-600 rounded-lg">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <h2 class="font-bold text-slate-800 text-base">Rincian Pengeluaran Harian</h2>
+                        </div>
+                        <button onclick="addExpenseRow()" class="px-3 py-1.5 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition">+ Tambah Pengeluaran</button>
+                    </div>
+
+                    <p class="text-xs text-slate-500">Isi detail belanja operasional (misal: Es Kristal, Gula, Cup Tambahan, Penglaris, dll)</p>
+
+                    <div id="expenseListContainer" class="space-y-3 max-h-60 overflow-y-auto pr-1"></div>
+
+                    <div class="pt-3 border-t border-slate-200 flex justify-between items-center font-bold text-slate-800">
+                        <span>Total Pengeluaran:</span>
+                        <span id="totalExpenseDisplay" class="text-red-600 text-lg">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION RECAP -->
+        <section id="section-recap" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4 no-print">
+                <div class="space-y-1 text-center md:text-left">
+                    <span class="bg-brand-500/20 text-brand-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-brand-500/30">Kirim & Simpan Laporan Kasir</span>
+                    <h3 class="font-bold text-base">Bagikan Hasil Shift ke Owner</h3>
+                    <p class="text-xs text-slate-300">Pilih Opsi Kirim via WhatsApp, Unduh File Teks (.txt), atau Simpan sebagai PDF/Cetak Dokumen.</p>
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-2.5 w-full md:w-auto">
+                    <button onclick="shareToWhatsApp()" class="flex-1 md:flex-initial px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow active:scale-95">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        <span>Kirim WA</span>
+                    </button>
+                    <button onclick="openExportModal()" class="flex-1 md:flex-initial px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow active:scale-95">
+                        <i class="fa-solid fa-file-export text-lg"></i>
+                        <span>Opsi File & Salin</span>
+                    </button>
+                    <button onclick="downloadPDFReport()" class="flex-1 md:flex-initial px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow active:scale-95">
+                        <i class="fa-solid fa-file-pdf text-lg"></i>
+                        <span>Cetak / PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+                <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 gap-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-3 bg-amber-100 text-amber-700 rounded-xl">
+                            <i class="fa-solid fa-calculator text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-lg text-slate-800">Kalkulator Akhir Jam Kerja (Shift Rekap)</h2>
+                            <p class="text-xs text-slate-500">Hitung Keuntungan, Kerugian, Rekap Penjualan Teh & Rasa, serta Rekonsiliasi Uang Fisik Kasir</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="refreshRecapCalculation()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center space-x-1.5 shadow-sm active:scale-95 cursor-pointer no-print" title="Refresh hitungan rekap">
+                            <i id="recapRefreshIcon" class="fa-solid fa-rotate-right"></i>
+                            <span>Refresh Hitungan Rekap</span>
+                        </button>
+                        <button onclick="promptResetShift()" class="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl text-xs transition flex items-center space-x-1.5 shadow-sm active:scale-95 cursor-pointer no-print" title="Reset shift & transaksi">
+                            <i id="resetShiftIcon" class="fa-solid fa-arrows-rotate"></i>
+                            <span id="resetShiftText">Reset Shift Baru</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 space-y-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/70 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow">
+                                <i class="fa-solid fa-mug-hot text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-amber-950 text-base">Rekap Penjualan Teh per Cup (Turus)</h3>
+                                <p class="text-xs text-amber-800">Rincian khusus hasil penjualan Teh pada shift ini</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span id="recapTeaTotalCups" class="text-2xl font-black text-amber-900">0 Cup</span>
+                            <div id="recapTeaTotalRevenue" class="text-xs font-bold text-amber-700">Rp 0</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs font-bold text-amber-900">
+                            <span>Tampilan Hitungan Turus (`|||||`):</span>
+                            <span id="recapTeaCupFormula" class="text-[11px] text-amber-700 font-normal">0 Cup × Rp 3.000 = Rp 0</span>
+                        </div>
+                        <div id="recapTeaTallyVisual" class="font-mono text-sm font-bold text-amber-900 tracking-wider bg-white rounded-xl p-3 border border-amber-200/80 min-h-[44px] flex flex-wrap gap-1.5 items-center">
+                            <span class="text-slate-400 text-xs font-sans italic font-normal">Belum ada penjualan teh per cup tercatat.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <label class="text-xs font-semibold text-slate-600">Total Omset Penjualan</label>
+                        <div class="text-xl font-bold text-brand-700" id="recapTotalOmset">Rp 0</div>
+                        <p class="text-[11px] text-slate-400">Total dari Teh + Menu Rasa</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <label class="text-xs font-semibold text-slate-600">Total Pengeluaran</label>
+                        <div class="text-xl font-bold text-red-600" id="recapTotalPengeluaran">Rp 0</div>
+                        <p class="text-[11px] text-slate-400">Dari pencatatan belanja</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <label class="text-xs font-semibold text-slate-600">Uang Diambil / Kas (Rp)</label>
+                        <input type="number" id="inputUangDiambil" oninput="calculateShiftRecap()" placeholder="0" class="w-full mt-1 p-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-slate-500 outline-none">
+                        <p class="text-[11px] text-slate-400">Diambil Owner / Ang Ade</p>
+                    </div>
+
+                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-1">
+                        <label class="text-xs font-semibold text-amber-900">Uang Fisik Kas / Di Laci (Rp)</label>
+                        <input type="number" id="inputUangFisik" oninput="calculateShiftRecap()" placeholder="Hitung uang fisik di laci" class="w-full mt-1 p-2 border border-amber-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none">
+                        <p class="text-[11px] text-amber-700">Jumlah nyata uang di laci</p>
+                    </div>
+                </div>
+
+                <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="bg-slate-800 text-white p-4 font-bold flex justify-between items-center">
+                        <span>Ringkasan Hasil Shift Kerja</span>
+                        <span id="recapStatusBadge" class="text-xs px-3 py-1 rounded-full bg-slate-700 text-slate-200 font-normal">Belum Dihitung</span>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white">
+                        <div class="space-y-3">
+                            <h3 class="font-bold text-slate-700 text-sm border-b pb-2">Rincian Omset & Keuntungan Teoretis</h3>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Penjualan Teh per Cup:</span>
+                                <span id="summaryPenjualanTeh" class="font-semibold text-amber-800">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Penjualan Cup Rasa:</span>
+                                <span id="summaryPenjualanRasa" class="font-semibold text-blue-800">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-sm pt-1 border-t border-slate-100">
+                                <span class="text-slate-600 font-semibold">Total Omset Kotor:</span>
+                                <span id="summaryOmset" class="font-bold text-slate-900">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-red-600">
+                                <span>Dikurangi Pengeluaran:</span>
+                                <span id="summaryPengeluaran" class="font-semibold">- Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-slate-600">
+                                <span>Dikurangi Uang Diambil:</span>
+                                <span id="summaryDiambil" class="font-semibold text-slate-800">- Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-base font-bold pt-2 border-t text-slate-800">
+                                <span>Laba / Sisa Bersih Teoretis:</span>
+                                <span id="summaryLabaTeoretis" class="text-brand-700">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:pl-6">
+                            <h3 class="font-bold text-slate-700 text-sm border-b pb-2">Pencocokan Uang Fisik Kas</h3>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Target Uang Fisik Seharusnya:</span>
+                                <span id="summaryTargetFisik" class="font-semibold">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Uang Fisik Sebenarnya (di Laci):</span>
+                                <span id="summaryUangFisik" class="font-semibold text-blue-600">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-base font-bold pt-2 border-t text-slate-800">
+                                <span>Status Selisih Kas:</span>
+                                <span id="summarySelisih" class="text-slate-800">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <h3 class="font-bold text-slate-800 text-sm mb-3">Riwayat Transaksi Hari Ini</h3>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-100 text-slate-600 border-b">
+                                <tr>
+                                    <th class="p-3">Waktu</th>
+                                    <th class="p-3">Item Pesanan</th>
+                                    <th class="p-3">Qty Cup</th>
+                                    <th class="p-3">Total</th>
+                                    <th class="p-3 text-center no-print">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionHistoryTable" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="5" class="p-4 text-center text-slate-400 text-xs">Belum ada transaksi tersimpan.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 shadow-lg no-print">
+        <div class="max-w-7xl mx-auto px-3 py-2 space-y-2">
+            <div id="bottomSearchContainer" class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" oninput="filterMenu()" placeholder="Cari rasa menu (e.g. Teh, Nanas, Melon, Matcha, Boba)..." class="w-full pl-9 pr-4 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-xs">
+            </div>
+
+            <div class="flex justify-around items-center pt-0.5">
+                <button onclick="switchTab('pos')" id="tab-pos" class="tab-btn flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center justify-center space-y-0.5 bg-brand-50 text-brand-700 border border-brand-200 transition">
+                    <i class="fa-solid fa-cash-register text-base"></i>
+                    <span>Menu & Transaksi</span>
+                </button>
+                <button onclick="switchTab('stock')" id="tab-stock" class="tab-btn flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center justify-center space-y-0.5 text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-boxes-stacked text-base"></i>
+                    <span>Stok Rasa</span>
+                </button>
+                <button onclick="switchTab('expenses')" id="tab-expenses" class="tab-btn flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center justify-center space-y-0.5 text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-boxes-packing text-base"></i>
+                    <span>Cup & Pengeluaran</span>
+                </button>
+                <button onclick="switchTab('recap')" id="tab-recap" class="tab-btn flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center justify-center space-y-0.5 text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-chart-line text-base"></i>
+                    <span>Hitungan Akhir Shift</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAMERA / OCR STOK BUKU MODAL -->
+    <div id="cameraModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-4 no-print">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="bg-purple-900 text-white p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-camera text-purple-300"></i>
+                    <span class="font-bold text-sm">Pindai / Memotret Stok Buku Awal</span>
+                </div>
+                <button onclick="closeCameraModal()" class="w-8 h-8 rounded-full bg-purple-800 hover:bg-red-600 text-purple-200 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 flex-1 overflow-y-auto space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Arahkan kamera ke <strong>Catatan Stok Awal di Buku</strong> atau unggah foto catatan. AI akan membaca tulisan & angka, lalu Anda cek dan koreksi sebelum diterapkan.
+                </p>
+
+                <div class="bg-purple-50 border border-purple-200 rounded-xl p-2.5 text-[11px] text-purple-900 leading-relaxed">
+                    <strong>Tips supaya terbaca jelas:</strong> foto dari atas (tidak miring), cahaya terang tanpa bayangan tangan, satu halaman penuh masuk frame, dan tulisan tidak buram. Kalau buku panjang, foto per halaman.
+                </div>
+
+                <!-- Camera preview / Image canvas -->
+                <div class="relative bg-black rounded-2xl overflow-hidden aspect-video flex items-center justify-center border border-slate-300 shadow-inner">
+                    <video id="cameraVideo" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+                    <img id="imagePreview" class="w-full h-full object-contain hidden" alt="Preview Foto Buku">
+
+                    <div id="cameraPlaceholder" class="text-center p-6 text-slate-400 space-y-2">
+                        <i class="fa-solid fa-book-open text-4xl text-purple-400/60"></i>
+                        <p class="text-xs">Aktifkan kamera atau Upload file foto catatan stok buku.</p>
+                    </div>
+
+                    <!-- Scanning Overlay -->
+                    <div id="scanningOverlay" class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm flex flex-col items-center justify-center text-white hidden">
+                        <i class="fa-solid fa-wand-magic-sparkles text-3xl text-purple-400 animate-bounce mb-2"></i>
+                        <span class="text-sm font-bold">AI Sedang Membaca Catatan Buku...</span>
+                        <span class="text-xs text-purple-200 mt-1">Membaca tulisan, nama rasa & jumlah stok</span>
+                    </div>
+                </div>
+
+                <!-- Camera Controls -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btnStartCamera" onclick="startCamera()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-video"></i>
+                        <span>Buka Kamera</span>
+                    </button>
+                    <label class="py-2.5 bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 transition cursor-pointer text-center">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Upload Foto Buku</span>
+                        <input type="file" id="bookImageInput" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                    </label>
+                </div>
+
+                <div id="snapBtnContainer" class="hidden">
+                    <button onclick="takeSnapshotAndAnalyze()" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-circle-dot text-lg text-red-400"></i>
+                        <span>Ambil Foto & Baca Stok (AI)</span>
+                    </button>
+                </div>
+
+                <div id="retryContainer" class="hidden">
+                    <button onclick="retryOcr()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 border border-slate-300">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Baca Ulang Foto Ini</span>
+                    </button>
+                </div>
+
+                <!-- Pengaturan API Key -->
+                <details id="apiKeyDetails" class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs">
+                    <summary class="cursor-pointer font-semibold text-slate-700 select-none">
+                        <i class="fa-solid fa-key text-slate-400 mr-1"></i> Pengaturan API Key Gemini
+                    </summary>
+                    <div class="mt-2 space-y-2">
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Isi jika AI menampilkan error API Key. Dapatkan gratis di Google AI Studio (aistudio.google.com). Key hanya disimpan di HP/browser ini.
+                        </p>
+                        <div class="flex space-x-2">
+                            <input type="password" id="geminiApiKeyInput" placeholder="Tempel API Key di sini" autocomplete="off" class="flex-1 min-w-0 p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-purple-500">
+                            <button onclick="saveGeminiApiKey()" class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-xs">Simpan</button>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Detection Result Table / List -->
+                <div id="ocrResultSection" class="hidden space-y-3 pt-2 border-t border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-list-check text-purple-600"></i>
+                            <span>Hasil Pembacaan Stok AI:</span>
+                        </h4>
+                        <span id="ocrDetectedCount" class="text-[11px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-semibold">0 Baris Terbaca</span>
+                    </div>
+
+                    <p id="ocrNotes" class="hidden text-[11px] leading-relaxed rounded-lg p-2 bg-amber-50 border border-amber-200 text-amber-900"></p>
+
+                    <div class="max-h-64 overflow-y-auto border border-slate-200 rounded-xl bg-slate-50 divide-y divide-slate-200" id="ocrResultList">
+                        <!-- Detected items will go here -->
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <button onclick="addOcrRow()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-[11px] border border-slate-300">
+                            <i class="fa-solid fa-plus"></i> Tambah Baris Manual
+                        </button>
+                        <span class="text-[10px] text-slate-400">Cek tiap baris dengan buku</span>
+                    </div>
+
+                    <details class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs">
+                        <summary class="cursor-pointer font-semibold text-slate-700 select-none">
+                            <i class="fa-solid fa-align-left text-slate-400 mr-1"></i> Lihat teks mentah yang dibaca AI
+                        </summary>
+                        <pre id="ocrRawText" class="mt-2 whitespace-pre-wrap break-words font-mono text-[11px] text-slate-700 max-h-40 overflow-y-auto"></pre>
+                    </details>
+
+                    <button onclick="applyOcrStockToApp()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Terapkan Sebagai Stok Awal Varian Rasa</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REFILL STOCK MODAL -->
+    <div id="refillStockModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2 text-indigo-700 font-bold">
+                    <i class="fa-solid fa-circle-plus text-lg"></i>
+                    <span>Isi Ulang / Edit Stok Rasa</span>
+                </div>
+                <button onclick="closeRefillModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div>
+                <h4 id="refillItemTitle" class="font-extrabold text-slate-800 text-base">Nama Rasa</h4>
+                <p id="refillItemSub" class="text-xs text-slate-500">Sisa stok saat ini: 0</p>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Set Stok Awal (Buku)</label>
+                    <input type="number" id="editInitialStockInput" min="0" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold text-slate-800 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Atau Tambah Refill Stok (+)</label>
+                    <div class="flex space-x-2">
+                        <input type="number" id="refillAmountInput" value="20" min="0" class="flex-1 p-2.5 border border-slate-300 rounded-xl font-bold text-slate-800 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <button onclick="addRefillQuick(10)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">+10</button>
+                        <button onclick="addRefillQuick(25)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">+25</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeRefillModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
+                <button onclick="submitRefillStock()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow transition">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULK STOCK MODAL -->
+    <div id="bulkStockModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2 text-indigo-700 font-bold">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                    <span>Set Refill / Stok Serentak</span>
+                </div>
+                <button onclick="closeBulkStockModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500 leading-relaxed">
+                Fitur ini memperbolehkan Anda menambah jumlah stok (refill) ke <strong>semua menu rasa</strong> sekaligus tanpa batas.
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tambah Refill Stok ke Semua Rasa (+)</label>
+                    <input type="number" id="bulkAddStockInput" value="30" min="1" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold text-slate-800 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Atau Reset Stok Awal Semua Rasa Ke Angka:</label>
+                    <div class="flex space-x-2">
+                        <input type="number" id="bulkSetInitialInput" value="50" min="0" class="flex-1 p-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 outline-none">
+                        <button onclick="applyBulkSetInitial()" class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs">Set Stok Awal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeBulkStockModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
+                <button onclick="applyBulkRefill()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow transition">+ Tambah Refill Semua</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPORT REPORT MODAL -->
+    <div id="exportReportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-file-lines text-amber-400"></i>
+                    <span class="font-bold text-sm">Dokumen Laporan Shift</span>
+                </div>
+                <button onclick="closeExportModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 flex-1 overflow-y-auto space-y-3">
+                <p class="text-xs text-slate-500">Berikut isi laporan ringkas shift kerja Way's Tea Club yang siap disalin atau diunduh:</p>
+                <textarea id="reportTextPreview" readonly class="w-full h-64 p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 focus:outline-none resize-none leading-relaxed"></textarea>
+            </div>
+
+            <div class="p-4 bg-slate-100 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button onclick="copyReportText()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Salin Teks</span>
+                </button>
+                <button onclick="downloadTextReport()" class="py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Unduh .TXT</span>
+                </button>
+                <button onclick="shareToWhatsApp()" class="col-span-2 sm:col-span-1 py-2.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Kirim WA</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CALCULATOR MODAL -->
+    <div id="calculatorModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-xs overflow-hidden">
+            <div class="bg-slate-800 text-white p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-calculator text-amber-400"></i>
+                    <span class="font-bold text-sm">Kalkulator Kasir</span>
+                </div>
+                <button onclick="toggleCalculator()" class="w-8 h-8 rounded-full bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="bg-slate-900 p-4 text-right">
+                <div id="calcExpr" class="text-xs text-slate-400 h-4 overflow-hidden mb-1"></div>
+                <div id="calcScreen" class="text-2xl font-bold text-white tracking-wide overflow-x-auto hide-scrollbar">0</div>
+            </div>
+
+            <div class="p-4 grid grid-cols-4 gap-2 bg-slate-100">
+                <button onclick="calcClear()" class="p-3 bg-red-100 text-red-600 font-bold rounded-2xl hover:bg-red-200 transition">C</button>
+                <button onclick="calcBackspace()" class="p-3 bg-slate-200 text-slate-700 font-bold rounded-2xl hover:bg-slate-300 transition"><i class="fa-solid fa-backspace"></i></button>
+                <button onclick="calcOp('/')" class="p-3 bg-amber-100 text-amber-700 font-bold rounded-2xl hover:bg-amber-200 transition">÷</button>
+                <button onclick="calcOp('*')" class="p-3 bg-amber-100 text-amber-700 font-bold rounded-2xl hover:bg-amber-200 transition">×</button>
+
+                <button onclick="calcNum('7')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">7</button>
+                <button onclick="calcNum('8')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">8</button>
+                <button onclick="calcNum('9')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">9</button>
+                <button onclick="calcOp('-')" class="p-3 bg-amber-100 text-amber-700 font-bold rounded-2xl hover:bg-amber-200 transition">-</button>
+
+                <button onclick="calcNum('4')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">4</button>
+                <button onclick="calcNum('5')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">5</button>
+                <button onclick="calcNum('6')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">6</button>
+                <button onclick="calcOp('+')" class="p-3 bg-amber-100 text-amber-700 font-bold rounded-2xl hover:bg-amber-200 transition">+</button>
+
+                <button onclick="calcNum('1')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">1</button>
+                <button onclick="calcNum('2')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">2</button>
+                <button onclick="calcNum('3')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">3</button>
+                <button onclick="calcEquals()" class="row-span-2 p-3 bg-brand-600 text-white font-bold rounded-2xl hover:bg-brand-700 shadow-md transition flex items-center justify-center text-lg">=</button>
+
+                <button onclick="calcNum('0')" class="col-span-2 p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">0</button>
+                <button onclick="calcNum('.')" class="p-3 bg-white text-slate-800 font-bold rounded-2xl hover:bg-slate-50 shadow-sm transition">.</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESET CONFIRMATION MODAL -->
+    <div id="confirmResetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden p-6 space-y-4">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="text-center space-y-1">
+                <h3 class="font-bold text-slate-800 text-base">Refresh Shift & Transaksi?</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Tindakan ini akan mengosongkan riwayat transaksi, turus teh, serta hitungan saat ini untuk memulai shift baru.
+                </p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="closeResetModal()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
+                <button onclick="executeShiftReset()" class="py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition shadow-md">Ya, Refresh Shift</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotification" class="fixed bottom-16 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none no-print">
+        <div id="toastBox" class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 border border-slate-700">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-brand-500 text-lg"></i>
+            <span id="toastMessage" class="text-sm font-semibold">Notifikasi</span>
+        </div>
+    </div>
+
+    <script>
+        const TEA_ITEM_ID = 0;
+        const DEFAULT_INITIAL_STOCK = 50;
+
+        const MENU_DATA = [
+            { id: TEA_ITEM_ID, name: "Teh per Cup", category: "TEH PER CUP", price: 3000, initialStock: 999, refillStock: 0 },
+            { id: 1, name: "Coklat", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 2, name: "Strawberry", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 3, name: "Alpukat", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 4, name: "Taro", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 5, name: "Mangga", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 6, name: "Jambu", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 7, name: "Durian", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 8, name: "Pisang", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 9, name: "Vanilla", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 10, name: "Leci", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 11, name: "Teler", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 12, name: "Doger", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 13, name: "Chocorio", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 14, name: "Vanilla Blue", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 15, name: "Blue Velvet", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 16, name: "Permenkaret", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 17, name: "Kacang Hijau", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 18, name: "Jagung Manis", category: "MIXTEA (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 19, name: "Rasberry Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 20, name: "Nanas Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 21, name: "Jeruk Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 22, name: "Melon Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 23, name: "Anggur Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 24, name: "Mocca Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 25, name: "Kurma Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 26, name: "Markisa Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 27, name: "Semangka Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 28, name: "Cocopandan Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 29, name: "Sirsak Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 30, name: "Lychee Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 31, name: "Lemon Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 32, name: "Mangga Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 33, name: "Apel Squash", category: "SQUASH (6K)", price: 6000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 34, name: "Matcha Premium", category: "PREMIUM (7K)", price: 7000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 35, name: "Red Velvet", category: "PREMIUM (7K)", price: 7000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 36, name: "Choco Hazelnut", category: "PREMIUM (7K)", price: 7000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 },
+            { id: 37, name: "Boba Brown Sugar", category: "BOBA (8K)", price: 8000, initialStock: DEFAULT_INITIAL_STOCK, refillStock: 0 }
+        ];
+
+        // State Application
+        let menuItems = [];
+        let cart = [];
+        let transactions = [];
+        let expenses = [];
+        let activeCategory = "SEMUA";
+        let activeRefillItemId = null;
+        let detectedOcrItems = [];
+        let cameraStream = null;
+
+        // --- Helper Functions ---
+        function formatRupiah(amount) {
+            return "Rp " + (amount || 0).toLocaleString('id-ID');
+        }
+
+        function showToast(msg, iconClass = "fa-circle-check text-brand-500") {
+            const toast = document.getElementById('toastNotification');
+            const messageEl = document.getElementById('toastMessage');
+            const iconEl = document.getElementById('toastIcon');
+            messageEl.textContent = msg;
+            iconEl.className = "fa-solid " + iconClass + " text-lg";
+            
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // --- Initialization ---
+        function initApp() {
+            const savedMenu = localStorage.getItem('ways_tea_menu_v2');
+            if (savedMenu) {
+                try { menuItems = JSON.parse(savedMenu); } catch (e) { menuItems = [...MENU_DATA]; }
+            } else {
+                menuItems = JSON.parse(JSON.stringify(MENU_DATA));
+            }
+
+            const savedTx = localStorage.getItem('ways_tea_transactions_v2');
+            if (savedTx) {
+                try { transactions = JSON.parse(savedTx); } catch (e) { transactions = []; }
+            }
+
+            const savedExp = localStorage.getItem('ways_tea_expenses_v2');
+            if (savedExp) {
+                try { expenses = JSON.parse(savedExp); } catch (e) { expenses = []; }
+            } else {
+                expenses = [
+                    { id: Date.now(), name: "Es Kristal", amount: 10000 },
+                    { id: Date.now() + 1, name: "Kantong Plastik / Sedotan", amount: 5000 }
+                ];
+            }
+
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            renderCategoryFilterBar();
+            renderMenuGrid();
+            renderCart();
+            renderStockTable();
+            renderExpenseList();
+            renderTransactionHistory();
+            calculateShiftRecap();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', dateOptions);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
+        }
+
+        function saveData() {
+            localStorage.setItem('ways_tea_menu_v2', JSON.stringify(menuItems));
+            localStorage.setItem('ways_tea_transactions_v2', JSON.stringify(transactions));
+            localStorage.setItem('ways_tea_expenses_v2', JSON.stringify(expenses));
+        }
+
+        // --- Navigation Tabs ---
+        function switchTab(tab) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center justify-center space-y-0.5 text-slate-600 hover:bg-slate-100 transition";
+            });
+
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center justify-center space-y-0.5 bg-brand-50 text-brand-700 border border-brand-200 transition";
+            }
+
+            const bottomSearch = document.getElementById('bottomSearchContainer');
+            if (tab === 'pos') {
+                bottomSearch.classList.remove('hidden');
+            } else {
+                bottomSearch.classList.add('hidden');
+            }
+
+            if (tab === 'recap') {
+                calculateShiftRecap();
+            }
+        }
+
+        // --- STREAMING_CHUNK:Menu Rendering & Cart Handling... ---
+        function renderCategoryFilterBar() {
+            const categories = ["SEMUA", "TEH PER CUP", "MIXTEA (6K)", "SQUASH (6K)", "PREMIUM (7K)", "BOBA (8K)"];
+            const bar = document.getElementById('categoryFilterBar');
+            bar.innerHTML = categories.map(cat => `
+                <button onclick="setCategoryFilter('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${activeCategory === cat ? 'bg-brand-600 text-white shadow' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function setCategoryFilter(cat) {
+            activeCategory = cat;
+            renderCategoryFilterBar();
+            renderMenuGrid();
+        }
+
+        function renderMenuGrid(searchKeyword = "") {
+            const grid = document.getElementById('menuGrid');
+            const keyword = (searchKeyword || document.getElementById('searchInput').value || "").toLowerCase();
+
+            const filtered = menuItems.filter(item => {
+                if (item.id === TEA_ITEM_ID) return false; // Tea per cup handled separately
+                const matchesCat = activeCategory === "SEMUA" || item.category === activeCategory;
+                const matchesSearch = item.name.toLowerCase().includes(keyword) || item.category.toLowerCase().includes(keyword);
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-xs">Menu rasa tidak ditemukan.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(item => {
+                const sold = getItemSoldQty(item.id);
+                const totalStock = (item.initialStock || 0) + (item.refillStock || 0);
+                const available = Math.max(0, totalStock - sold);
+                const isOut = available <= 0;
+
+                return `
+                    <div onclick="${isOut ? '' : `addToCart(${item.id})`}" class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex flex-col justify-between transition ${isOut ? 'opacity-50 cursor-not-allowed bg-slate-50' : 'hover:border-brand-500 hover:shadow-md cursor-pointer active:scale-95'}">
+                        <div>
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100">${item.category}</span>
+                                <span class="text-[10px] font-bold ${isOut ? 'text-red-600 bg-red-50' : 'text-slate-500 bg-slate-100'} px-1.5 py-0.5 rounded-md">
+                                    Stok: ${available}
+                                </span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-sm leading-snug">${item.name}</h3>
+                        </div>
+                        <div class="mt-3 flex justify-between items-center">
+                            <span class="font-extrabold text-slate-900 text-xs">${formatRupiah(item.price)}</span>
+                            <button class="w-7 h-7 rounded-lg ${isOut ? 'bg-slate-200 text-slate-400' : 'bg-brand-600 text-white hover:bg-brand-700'} flex items-center justify-center text-xs font-bold transition">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getItemSoldQty(itemId) {
+            let total = 0;
+            transactions.forEach(tx => {
+                tx.items.forEach(i => {
+                    if (i.id === itemId) total += i.qty;
+                });
+            });
+            return total;
+        }
+
+        function filterMenu() {
+            renderMenuGrid();
+        }
+
+        function addToCart(itemId, qtyChange = 1) {
+            const item = menuItems.find(m => m.id === itemId);
+            if (!item) return;
+
+            const currentInCart = cart.find(c => c.id === itemId);
+            const currentQtyInCart = currentInCart ? currentInCart.qty : 0;
+            const sold = getItemSoldQty(itemId);
+            const totalStock = (item.initialStock || 0) + (item.refillStock || 0);
+            const available = Math.max(0, totalStock - sold);
+
+            if (qtyChange > 0 && (currentQtyInCart + qtyChange) > available && itemId !== TEA_ITEM_ID) {
+                showToast(`Stok ${item.name} sisa ${available}!`, "fa-triangle-exclamation text-amber-500");
+                return;
+            }
+
+            if (currentInCart) {
+                currentInCart.qty += qtyChange;
+                if (currentInCart.qty <= 0) {
+                    cart = cart.filter(c => c.id !== itemId);
+                }
+            } else if (qtyChange > 0) {
+                cart.push({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    qty: qtyChange
+                });
+            }
+
+            renderCart();
+            renderMenuGrid();
+        }
+
+        function addTeaToCart(qtyDelta) {
+            addToCart(TEA_ITEM_ID, qtyDelta);
+        }
+
+        function resetTeaTallyInCart() {
+            cart = cart.filter(c => c.id !== TEA_ITEM_ID);
+            renderCart();
+            renderMenuGrid();
+            showToast("Turus teh berhasil direset.");
+        }
+
+        function clearCart() {
+            cart = [];
+            renderCart();
+            renderMenuGrid();
+            document.getElementById('paidAmount').value = '';
+            calculateChange();
+        }
+
+        function renderCart() {
+            const cartList = document.getElementById('cartList');
+            const teaInCart = cart.find(c => c.id === TEA_ITEM_ID);
+            const teaCount = teaInCart ? teaInCart.qty : 0;
+
+            document.getElementById('teaQuickCount').textContent = `${teaCount} Cup`;
+            
+            // Build Tally Visual (|||| |)
+            const tallyVisualEl = document.getElementById('teaTallyVisual');
+            if (teaCount <= 0) {
+                tallyVisualEl.innerHTML = `<span class="text-slate-400 text-xs font-sans italic font-normal">Tekan tombol +1 / +5 untuk tambah turus teh</span>`;
+            } else {
+                let groups = Math.floor(teaCount / 5);
+                let remainder = teaCount % 5;
+                let html = '';
+                for (let i = 0; i < groups; i++) {
+                    html += `<span class="bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded shadow-xs font-black">||||/</span>`;
+                }
+                if (remainder > 0) {
+                    html += `<span class="bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-bold">${'|'.repeat(remainder)}</span>`;
+                }
+                html += `<span class="text-xs text-slate-500 font-sans ml-1">(${teaCount} cup)</span>`;
+                tallyVisualEl.innerHTML = html;
+            }
+
+            if (cart.length === 0) {
+                cartList.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs italic">Keranjang belanja kosong</div>`;
+            } else {
+                cartList.innerHTML = cart.map(item => `
+                    <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <div class="flex-1 pr-2">
+                            <div class="font-bold text-slate-800 text-xs">${item.name}</div>
+                            <div class="text-[11px] text-slate-500">${formatRupiah(item.price)} × ${item.qty}</div>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <button onclick="addToCart(${item.id}, -1)" class="w-6 h-6 bg-slate-200 hover:bg-slate-300 rounded-lg flex items-center justify-center font-bold text-xs">-</button>
+                            <span class="font-bold text-xs text-slate-800 w-5 text-center">${item.qty}</span>
+                            <button onclick="addToCart(${item.id}, 1)" class="w-6 h-6 bg-slate-200 hover:bg-slate-300 rounded-lg flex items-center justify-center font-bold text-xs">+</button>
+                            <span class="font-bold text-xs text-brand-700 ml-2 w-16 text-right">${formatRupiah(item.price * item.qty)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            let totalItems = 0;
+            let totalPrice = 0;
+            cart.forEach(item => {
+                totalItems += item.qty;
+                totalPrice += item.price * item.qty;
+            });
+
+            document.getElementById('cartTotalItems').textContent = `${totalItems} cup`;
+            document.getElementById('cartTotalPrice').textContent = formatRupiah(totalPrice);
+            calculateChange();
+        }
+
+        function calculateChange() {
+            let totalPrice = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            let paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+            let change = paid - totalPrice;
+            const changeDisplay = document.getElementById('changeDisplay');
+
+            if (change < 0) {
+                changeDisplay.textContent = `Kurang ${formatRupiah(Math.abs(change))}`;
+                changeDisplay.className = "font-bold text-red-600 text-base";
+            } else {
+                changeDisplay.textContent = formatRupiah(change);
+                changeDisplay.className = "font-bold text-amber-900 text-base";
+            }
+        }
+
+        function setExactAmount() {
+            let totalPrice = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            document.getElementById('paidAmount').value = totalPrice;
+            calculateChange();
+        }
+
+        function addMoney(val) {
+            let current = parseFloat(document.getElementById('paidAmount').value) || 0;
+            document.getElementById('paidAmount').value = current + val;
+            calculateChange();
+        }
+
+        function processOrder() {
+            if (cart.length === 0) {
+                showToast("Keranjang masih kosong!", "fa-triangle-exclamation text-amber-500");
+                return;
+            }
+
+            let totalPrice = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            let paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+
+            if (paid < totalPrice) {
+                showToast("Uang pembayaran masih kurang!", "fa-triangle-exclamation text-red-500");
+                return;
+            }
+
+            const tx = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                items: JSON.parse(JSON.stringify(cart)),
+                totalPrice: totalPrice,
+                paid: paid,
+                change: paid - totalPrice
+            };
+
+            transactions.unshift(tx);
+            saveData();
+
+            showToast("Transaksi berhasil disimpan!", "fa-circle-check text-brand-500");
+            cart = [];
+            document.getElementById('paidAmount').value = '';
+            
+            renderCart();
+            renderMenuGrid();
+            renderStockTable();
+            renderTransactionHistory();
+            calculateShiftRecap();
+        }
+
+        // --- STREAMING_CHUNK:Camera & Gemini AI OCR Integration for Reading Book Stock... ---
+        // Model dicoba berurutan: jika model pertama tidak tersedia, otomatis pakai model berikutnya.
+        const GEMINI_MODELS = ['gemini-3-flash-preview', 'gemini-2.5-flash'];
+        const OCR_MAX_SIDE = 2000;      // sisi terpanjang foto (px) sebelum dikirim ke AI
+        let lastOcrImageDataUrl = null; // foto terakhir (sudah diperkecil) untuk "Baca Ulang"
+        let ocrRawText = "";
+        let ocrNotes = "";
+        let ocrBusy = false;
+
+        function escapeHtml(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        function getGeminiApiKey() {
+            try { return localStorage.getItem('ways_tea_gemini_key') || ""; } catch (e) { return ""; }
+        }
+
+        function saveGeminiApiKey() {
+            const val = document.getElementById('geminiApiKeyInput').value.trim();
+            try { localStorage.setItem('ways_tea_gemini_key', val); } catch (e) {}
+            showToast(val ? "API Key tersimpan." : "API Key dihapus.");
+        }
+
+        function resetOcrView() {
+            stopCamera();
+            lastOcrImageDataUrl = null;
+            detectedOcrItems = [];
+            ocrRawText = "";
+            ocrNotes = "";
+            const preview = document.getElementById('imagePreview');
+            preview.removeAttribute('src');
+            preview.classList.add('hidden');
+            document.getElementById('ocrResultSection').classList.add('hidden');
+            document.getElementById('cameraPlaceholder').classList.remove('hidden');
+            document.getElementById('cameraVideo').classList.add('hidden');
+            document.getElementById('snapBtnContainer').classList.add('hidden');
+            document.getElementById('retryContainer').classList.add('hidden');
+            document.getElementById('scanningOverlay').classList.add('hidden');
+        }
+
+        function openCameraModal() {
+            document.getElementById('cameraModal').classList.remove('hidden');
+            resetOcrView();
+            document.getElementById('geminiApiKeyInput').value = getGeminiApiKey();
+        }
+
+        function closeCameraModal() {
+            stopCamera();
+            document.getElementById('cameraModal').classList.add('hidden');
+        }
+
+        async function startCamera() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("Browser/HP tidak mengizinkan kamera (pastikan dibuka lewat https)");
+                }
+                stopCamera();
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: "environment" },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: false
+                });
+
+                const video = document.getElementById('cameraVideo');
+                video.srcObject = cameraStream;
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('cameraPlaceholder').classList.add('hidden');
+                video.classList.remove('hidden');
+                document.getElementById('snapBtnContainer').classList.remove('hidden');
+                document.getElementById('retryContainer').classList.add('hidden');
+                showToast("Kamera aktif. Arahkan ke catatan buku!");
+            } catch (err) {
+                alert("Gagal mengakses kamera: " + err.message + ". Silakan gunakan opsi 'Upload Foto Buku'.");
+            }
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error("Gagal membuka file foto."));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function loadImageFromSrc(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error("Foto tidak bisa dibuka (format tidak didukung). Coba foto ulang atau simpan sebagai JPG."));
+                img.src = src;
+            });
+        }
+
+        // Perkecil foto (HP bisa 12MP+) & ubah ke JPEG agar cepat terkirim dan tulisan tetap tajam
+        async function prepareImageForAI(src) {
+            const img = await loadImageFromSrc(src);
+            let w = img.naturalWidth || img.width;
+            let h = img.naturalHeight || img.height;
+            const scale = Math.min(1, OCR_MAX_SIDE / Math.max(w, h));
+            w = Math.max(1, Math.round(w * scale));
+            h = Math.max(1, Math.round(h * scale));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            return canvas.toDataURL('image/jpeg', 0.92);
+        }
+
+        async function processBookImage(src) {
+            if (ocrBusy) return;
+            const prepared = await prepareImageForAI(src);
+            lastOcrImageDataUrl = prepared;
+
+            const preview = document.getElementById('imagePreview');
+            preview.src = prepared;
+            preview.classList.remove('hidden');
+            document.getElementById('cameraVideo').classList.add('hidden');
+            document.getElementById('cameraPlaceholder').classList.add('hidden');
+            document.getElementById('snapBtnContainer').classList.add('hidden');
+
+            await analyzeBookImageWithAI(prepared);
+        }
+
+        async function handleImageUpload(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            stopCamera();
+            try {
+                const dataUrl = await readFileAsDataURL(file);
+                await processBookImage(dataUrl);
+            } catch (err) {
+                console.error("Upload error:", err);
+                showOcrError(err.message || "Gagal memproses foto.");
+            } finally {
+                input.value = ''; // agar foto yang sama bisa dipilih lagi
+            }
+        }
+
+        async function takeSnapshotAndAnalyze() {
+            const video = document.getElementById('cameraVideo');
+            if (!video.videoWidth || !video.videoHeight) {
+                showToast("Kamera belum siap, tunggu sebentar lalu coba lagi.", "fa-triangle-exclamation text-amber-500");
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+            stopCamera();
+
+            try {
+                await processBookImage(dataUrl);
+            } catch (err) {
+                console.error("Snapshot error:", err);
+                showOcrError(err.message || "Gagal memproses foto.");
+            }
+        }
+
+        function retryOcr() {
+            if (!lastOcrImageDataUrl || ocrBusy) return;
+            analyzeBookImageWithAI(lastOcrImageDataUrl);
+        }
+
+        // --- Prompt & skema output AI ---
+        function buildOcrPrompt() {
+            const menuList = menuItems
+                .filter(m => m.id !== TEA_ITEM_ID)
+                .map(m => `${m.id} = ${m.name} [${m.category}]`)
+                .join('\n');
+
+            return `Kamu adalah asisten kasir kedai minuman "Way's Tea Club". Foto yang diberikan adalah halaman buku catatan STOK AWAL (bisa tulisan tangan, bergaris, sedikit miring, ada coretan).
+
+TUGAS:
+1. Baca SEMUA baris tulisan di foto dengan teliti dari atas ke bawah (semua kolom/halaman yang terlihat). Salin apa adanya ke "raw_text", satu catatan per baris.
+2. Untuk setiap baris yang berisi nama rasa/menu + angka jumlah, cocokkan dengan daftar menu di bawah dan keluarkan sebagai satu entri di "items".
+
+DAFTAR MENU (id = nama [kategori]):
+${menuList}
+
+ATURAN PENTING:
+- "menu_id" HARUS salah satu id dari daftar di atas. Jika tidak ada yang cocok, isi null (jangan menebak asal).
+- Tulisan tangan sering disingkat atau salah eja (mis. "Strwb"/"Stroberi" = Strawberry, "Cokelat"/"Choco" = Coklat, "Lychee"/"Leci"). Gunakan akal sehat saat mencocokkan.
+- Perhatikan judul bagian di buku (MIXTEA, SQUASH, PREMIUM, BOBA). Nama yang sama bisa ada di dua kategori, mis. "Mangga" (MIXTEA) vs "Mangga Squash" (SQUASH). Jika ditulis tanpa kata "squash" tetapi berada di bagian squash, pilih versi squash. Jika tidak ada petunjuk, pilih versi MIXTEA.
+- Baris "Teh" / "Teh per cup" tidak ada di daftar menu, jadi abaikan.
+- "stock" = jumlah STOK AWAL rasa itu (bilangan bulat >= 0). Jika buku punya beberapa kolom (mis. stok awal, masuk, terjual, sisa), ambil kolom STOK AWAL. Jika hanya ada satu angka per rasa, pakai angka itu. Jika angka dicoret lalu diganti, pakai angka terbaru yang tidak dicoret. Jika berbentuk hitungan seperti "20+10", hitung hasilnya (30).
+- Baca angka dengan sangat hati-hati dan bedakan 1/7, 0/6, 4/9, 3/8, 5/6. Jika ragu, tetap beri tebakan terbaik tetapi turunkan "confidence".
+- "confidence": "high" jika nama dan angka jelas, "medium" jika agak ragu, "low" jika sulit dibaca.
+- "book_text": tulisan nama rasa persis seperti di buku.
+- Jangan mengarang rasa atau angka yang tidak ada di foto. Jika foto buram atau tidak ada catatan stok, kembalikan items kosong dan jelaskan di "notes".
+- Jika satu rasa muncul dua kali di buku, tetap keluarkan dua entri terpisah.
+- "notes": isi catatan singkat bila ada bagian yang tidak terbaca, terpotong, atau meragukan (boleh kosong).`;
+        }
+
+        const OCR_RESPONSE_SCHEMA = {
+            type: "OBJECT",
+            properties: {
+                raw_text: { type: "STRING" },
+                items: {
+                    type: "ARRAY",
+                    items: {
+                        type: "OBJECT",
+                        properties: {
+                            book_text: { type: "STRING" },
+                            menu_id: { type: "INTEGER", nullable: true },
+                            stock: { type: "INTEGER" },
+                            confidence: { type: "STRING", enum: ["high", "medium", "low"] }
+                        },
+                        required: ["book_text", "menu_id", "stock", "confidence"]
+                    }
+                },
+                notes: { type: "STRING" }
+            },
+            required: ["raw_text", "items"],
+            propertyOrdering: ["raw_text", "items", "notes"]
+        };
+
+        async function callGemini(prompt, base64Data) {
+            const apiKey = getGeminiApiKey();
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    responseMimeType: "application/json",
+                    responseSchema: OCR_RESPONSE_SCHEMA
+                }
+            };
+
+            let lastError = null;
+            for (const model of GEMINI_MODELS) {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    try {
+                        const res = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await res.json().catch(() => ({}));
+
+                        if (res.ok) {
+                            const parts = data?.candidates?.[0]?.content?.parts || [];
+                            const text = parts.map(p => p.text || '').join('').trim();
+                            if (!text) {
+                                const reason = data?.promptFeedback?.blockReason || data?.candidates?.[0]?.finishReason || 'kosong';
+                                const e = new Error(`AI tidak mengembalikan hasil (${reason}).`);
+                                e.status = 0;
+                                throw e;
+                            }
+                            return text;
+                        }
+
+                        const err = new Error(data?.error?.message || `Server AI error (HTTP ${res.status})`);
+                        err.status = res.status;
+                        lastError = err;
+                        if (res.status === 429 || res.status >= 500) {
+                            await sleep(1200 * (attempt + 1)); // coba lagi model yang sama
+                            continue;
+                        }
+                        break; // 400/401/403/404 -> coba model berikutnya
+                    } catch (e) {
+                        lastError = e;
+                        if (e.status !== undefined) break;   // error dari server/respon kosong
+                        await sleep(800 * (attempt + 1));    // error jaringan -> coba lagi
+                    }
+                }
+            }
+            throw lastError || new Error("Gagal menghubungi AI.");
+        }
+
+        function parseOcrJson(text) {
+            let clean = String(text).trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+            let parsed;
+            try {
+                parsed = JSON.parse(clean);
+            } catch (e) {
+                const s = clean.indexOf('{');
+                const t = clean.lastIndexOf('}');
+                if (s >= 0 && t > s) {
+                    parsed = JSON.parse(clean.slice(s, t + 1));
+                } else {
+                    throw new Error("Jawaban AI tidak bisa dibaca. Coba tekan 'Baca Ulang Foto Ini'.");
+                }
+            }
+            if (Array.isArray(parsed)) parsed = { items: parsed };
+            return parsed || { items: [] };
+        }
+
+        // --- Pencocokan nama rasa (cadangan jika AI tidak memberi id) ---
+        function normName(s) {
+            return String(s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function findMenuByName(text) {
+            const q = normName(text);
+            if (!q) return null;
+            const list = menuItems.filter(m => m.id !== TEA_ITEM_ID);
+            const exact = list.find(m => normName(m.name) === q);
+            if (exact) return exact;
+            // Pilih nama menu TERPANJANG yang ada di dalam tulisan (agar "Mangga Squash" tidak jadi "Mangga")
+            const contained = list
+                .filter(m => q.includes(normName(m.name)))
+                .sort((a, b) => b.name.length - a.name.length);
+            return contained.length ? contained[0] : null;
+        }
+
+        function normalizeOcrItems(rawItems) {
+            return (Array.isArray(rawItems) ? rawItems : []).map(it => {
+                const bookText = String(it.book_text || it.name || '').trim();
+                let target = null;
+                const idNum = parseInt(it.menu_id);
+                if (!isNaN(idNum)) target = menuItems.find(m => m.id === idNum && m.id !== TEA_ITEM_ID) || null;
+                if (!target) target = findMenuByName(bookText);
+
+                let confidence = ['high', 'medium', 'low'].includes(it.confidence) ? it.confidence : 'medium';
+                if (!target) confidence = 'low';
+
+                return {
+                    bookText,
+                    menuId: target ? target.id : null,
+                    stock: Math.max(0, parseInt(it.stock) || 0),
+                    confidence
+                };
+            });
+        }
+
+        async function analyzeBookImageWithAI(dataUrl) {
+            if (ocrBusy) return;
+            ocrBusy = true;
+            const overlay = document.getElementById('scanningOverlay');
+            overlay.classList.remove('hidden');
+            document.getElementById('retryContainer').classList.add('hidden');
+
+            try {
+                const base64Data = String(dataUrl).split(',')[1];
+                if (!base64Data) throw new Error("Data foto kosong.");
+
+                const text = await callGemini(buildOcrPrompt(), base64Data);
+                const parsed = parseOcrJson(text);
+
+                ocrRawText = String(parsed.raw_text || '').trim();
+                ocrNotes = String(parsed.notes || '').trim();
+                detectedOcrItems = normalizeOcrItems(parsed.items);
+
+                renderOcrResults();
+                if (detectedOcrItems.length > 0) {
+                    showToast(`AI membaca ${detectedOcrItems.length} baris. Cek dulu sebelum diterapkan.`);
+                } else {
+                    showToast("Tidak ada stok yang terbaca. Coba foto lebih jelas.", "fa-triangle-exclamation text-amber-500");
+                }
+            } catch (err) {
+                console.error("AI OCR Error:", err);
+                let msg = err?.message || "Tidak diketahui";
+                if (!getGeminiApiKey() && [400, 401, 403].includes(err?.status)) {
+                    msg = "API Key Gemini belum diisi atau tidak valid. Buka 'Pengaturan API Key Gemini' di bawah, isi key, Simpan, lalu tekan 'Baca Ulang Foto Ini'. (Detail: " + msg + ")";
+                    document.getElementById('apiKeyDetails').open = true;
+                }
+                showOcrError(msg);
+            } finally {
+                overlay.classList.add('hidden');
+                ocrBusy = false;
+                if (lastOcrImageDataUrl) document.getElementById('retryContainer').classList.remove('hidden');
+            }
+        }
+
+        function showOcrError(msg) {
+            const section = document.getElementById('ocrResultSection');
+            section.classList.remove('hidden');
+            document.getElementById('ocrDetectedCount').textContent = "Gagal Membaca";
+            document.getElementById('ocrNotes').classList.add('hidden');
+            document.getElementById('ocrRawText').textContent = "";
+            document.getElementById('ocrResultList').innerHTML =
+                `<div class="p-3 text-xs text-red-700 bg-red-50 leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(msg)}</div>`;
+            if (lastOcrImageDataUrl) document.getElementById('retryContainer').classList.remove('hidden');
+        }
+
+        function ocrMenuOptions(selectedId) {
+            const opts = menuItems
+                .filter(m => m.id !== TEA_ITEM_ID)
+                .map(m => `<option value="${m.id}" ${m.id === selectedId ? 'selected' : ''}>${escapeHtml(m.name)} (${escapeHtml(m.category.split(' ')[0])})</option>`)
+                .join('');
+            return `<option value="">— Pilih rasa —</option>` + opts;
+        }
+
+        function renderOcrResults() {
+            const items = detectedOcrItems;
+            const section = document.getElementById('ocrResultSection');
+            const list = document.getElementById('ocrResultList');
+            const countEl = document.getElementById('ocrDetectedCount');
+            const notesEl = document.getElementById('ocrNotes');
+
+            section.classList.remove('hidden');
+            countEl.textContent = `${items.length} Baris Terbaca`;
+            document.getElementById('ocrRawText').textContent = ocrRawText || "(AI tidak mengirim teks mentah)";
+
+            if (ocrNotes) {
+                notesEl.textContent = "Catatan AI: " + ocrNotes;
+                notesEl.classList.remove('hidden');
+            } else {
+                notesEl.classList.add('hidden');
+            }
+
+            if (items.length === 0) {
+                list.innerHTML = `<div class="p-3 text-center text-xs text-slate-500">Tidak ada rasa/stok yang terbaca dari foto. Coba foto lebih dekat & terang, lalu tekan "Baca Ulang", atau tambah baris manual.</div>`;
+                return;
+            }
+
+            const idCount = {};
+            items.forEach(i => { if (i.menuId !== null) idCount[i.menuId] = (idCount[i.menuId] || 0) + 1; });
+
+            const confStyle = {
+                high:   { label: 'Jelas',        cls: 'bg-green-100 text-green-800' },
+                medium: { label: 'Cek lagi',     cls: 'bg-amber-100 text-amber-800' },
+                low:    { label: 'Sulit dibaca', cls: 'bg-red-100 text-red-800' }
+            };
+
+            list.innerHTML = items.map((item, idx) => {
+                const isDup = item.menuId !== null && idCount[item.menuId] > 1;
+                const isUnmatched = item.menuId === null;
+                const bg = (isDup || isUnmatched) ? 'bg-red-50' : (item.confidence !== 'high' ? 'bg-amber-50' : 'bg-white');
+                const cs = confStyle[item.confidence] || confStyle.medium;
+                const flag = isDup ? 'Rasa ganda' : (isUnmatched ? 'Pilih rasa' : cs.label);
+                const flagCls = (isDup || isUnmatched) ? 'bg-red-100 text-red-800' : cs.cls;
+
+                return `
+                    <div class="p-2.5 space-y-1.5 ${bg}">
+                        <div class="flex items-center justify-between text-[11px] text-slate-500">
+                            <span class="truncate pr-2">Tertulis: <b class="text-slate-700">${item.bookText ? '"' + escapeHtml(item.bookText) + '"' : '-'}</b></span>
+                            <span class="shrink-0 px-2 py-0.5 rounded-full font-bold ${flagCls}">${flag}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <select onchange="updateOcrItemMenu(${idx}, this.value)" class="flex-1 min-w-0 p-1.5 border ${isUnmatched || isDup ? 'border-red-400' : 'border-slate-300'} rounded-lg text-xs font-bold text-slate-800 bg-white outline-none">
+                                ${ocrMenuOptions(item.menuId)}
+                            </select>
+                            <input type="number" min="0" inputmode="numeric" value="${item.stock}" onchange="updateOcrItemStock(${idx}, this.value)" class="w-16 p-1.5 border border-slate-300 rounded-lg text-center font-bold text-xs text-slate-900 bg-white outline-none">
+                            <button onclick="removeOcrItem(${idx})" class="p-1.5 text-red-500 hover:text-red-700 text-xs" title="Hapus baris">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateOcrItemStock(idx, val) {
+            if (detectedOcrItems[idx]) {
+                detectedOcrItems[idx].stock = Math.max(0, parseInt(val) || 0);
+            }
+        }
+
+        function updateOcrItemMenu(idx, val) {
+            if (detectedOcrItems[idx]) {
+                detectedOcrItems[idx].menuId = val === '' ? null : parseInt(val);
+                if (detectedOcrItems[idx].menuId !== null) detectedOcrItems[idx].confidence = 'high';
+                renderOcrResults();
+            }
+        }
+
+        function removeOcrItem(idx) {
+            detectedOcrItems.splice(idx, 1);
+            renderOcrResults();
+        }
+
+        function addOcrRow() {
+            detectedOcrItems.push({ bookText: '', menuId: null, stock: 0, confidence: 'high' });
+            renderOcrResults();
+            const list = document.getElementById('ocrResultList');
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function applyOcrStockToApp() {
+            const valid = detectedOcrItems.filter(i => i.menuId !== null);
+            if (valid.length === 0) {
+                showToast("Belum ada rasa yang cocok untuk diterapkan.", "fa-triangle-exclamation text-amber-500");
+                return;
+            }
+
+            const seen = new Set();
+            let hasDup = false;
+            valid.forEach(i => {
+                if (seen.has(i.menuId)) hasDup = true;
+                seen.add(i.menuId);
+            });
+            if (hasDup) {
+                showToast("Ada rasa ganda. Hapus atau ubah salah satu dulu.", "fa-triangle-exclamation text-red-500");
+                renderOcrResults();
+                return;
+            }
+
+            let appliedCount = 0;
+            valid.forEach(ocrItem => {
+                const target = menuItems.find(m => m.id === ocrItem.menuId);
+                if (target) {
+                    target.initialStock = Math.max(0, parseInt(ocrItem.stock) || 0);
+                    appliedCount++;
+                }
+            });
+
+            const skipped = detectedOcrItems.length - valid.length;
+            saveData();
+            renderStockTable();
+            renderMenuGrid();
+            closeCameraModal();
+            showToast(
+                `Stok awal ${appliedCount} varian rasa diterapkan!` + (skipped > 0 ? ` (${skipped} baris belum cocok dilewati)` : ''),
+                "fa-circle-check text-brand-500"
+            );
+        }
+
+        // --- STREAMING_CHUNK:Stock Management Table & Refill Functions... ---
+        function renderStockTable() {
+            const tbody = document.getElementById('stockTableBody');
+            const searchKw = (document.getElementById('stockSearchInput')?.value || "").toLowerCase();
+
+            const filtered = menuItems.filter(item => {
+                if (item.id === TEA_ITEM_ID) return false;
+                return item.name.toLowerCase().includes(searchKw) || item.category.toLowerCase().includes(searchKw);
+            });
+
+            tbody.innerHTML = filtered.map(item => {
+                const sold = getItemSoldQty(item.id);
+                const totalStock = (item.initialStock || 0) + (item.refillStock || 0);
+                const available = Math.max(0, totalStock - sold);
+                
+                let badgeClass = "bg-green-100 text-green-800";
+                let statusText = "Tersedia";
+                if (available <= 0) {
+                    badgeClass = "bg-red-100 text-red-800";
+                    statusText = "Habis";
+                } else if (available <= 10) {
+                    badgeClass = "bg-amber-100 text-amber-800";
+                    statusText = "Hampir Habis";
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-800">${item.name}</td>
+                        <td class="p-3 text-xs text-slate-500">${item.category}</td>
+                        <td class="p-3 text-center font-bold text-slate-700">${item.initialStock || 0}</td>
+                        <td class="p-3 text-center font-bold text-blue-600">${sold}</td>
+                        <td class="p-3 text-center font-extrabold text-slate-900">${available}</td>
+                        <td class="p-3 text-center">
+                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${badgeClass}">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="openRefillModal(${item.id})" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs transition border border-indigo-200">
+                                <i class="fa-solid fa-pen-to-square"></i> Refill / Edit
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openRefillModal(itemId) {
+            activeRefillItemId = itemId;
+            const item = menuItems.find(m => m.id === itemId);
+            if (!item) return;
+
+            const sold = getItemSoldQty(itemId);
+            const totalStock = (item.initialStock || 0) + (item.refillStock || 0);
+            const available = Math.max(0, totalStock - sold);
+
+            document.getElementById('refillItemTitle').textContent = item.name;
+            document.getElementById('refillItemSub').textContent = `Sisa stok saat ini: ${available} cup | Refill berjalan: +${item.refillStock || 0}`;
+            document.getElementById('editInitialStockInput').value = item.initialStock || 0;
+            document.getElementById('refillAmountInput').value = 20;
+
+            document.getElementById('refillStockModal').classList.remove('hidden');
+        }
+
+        function closeRefillModal() {
+            document.getElementById('refillStockModal').classList.add('hidden');
+        }
+
+        function addRefillQuick(amt) {
+            const input = document.getElementById('refillAmountInput');
+            input.value = (parseInt(input.value) || 0) + amt;
+        }
+
+        function submitRefillStock() {
+            if (!activeRefillItemId) return;
+            const item = menuItems.find(m => m.id === activeRefillItemId);
+            if (!item) return;
+
+            const newInitial = parseInt(document.getElementById('editInitialStockInput').value) || 0;
+            const refillAdd = parseInt(document.getElementById('refillAmountInput').value) || 0;
+
+            item.initialStock = newInitial;
+            item.refillStock = (item.refillStock || 0) + refillAdd;
+
+            saveData();
+            renderStockTable();
+            renderMenuGrid();
+            closeRefillModal();
+            showToast(`Stok ${item.name} diperbarui!`, "fa-circle-check text-indigo-500");
+        }
+
+        function openBulkStockModal() {
+            document.getElementById('bulkStockModal').classList.remove('hidden');
+        }
+
+        function closeBulkStockModal() {
+            document.getElementById('bulkStockModal').classList.add('hidden');
+        }
+
+        function applyBulkRefill() {
+            const addVal = parseInt(document.getElementById('bulkAddStockInput').value) || 0;
+            if (addVal <= 0) return;
+
+            menuItems.forEach(item => {
+                if (item.id !== TEA_ITEM_ID) {
+                    item.refillStock = (item.refillStock || 0) + addVal;
+                }
+            });
+
+            saveData();
+            renderStockTable();
+            renderMenuGrid();
+            closeBulkStockModal();
+            showToast(`Refill +${addVal} diterapkan ke semua rasa!`);
+        }
+
+        function applyBulkSetInitial() {
+            const setVal = parseInt(document.getElementById('bulkSetInitialInput').value) || 0;
+
+            menuItems.forEach(item => {
+                if (item.id !== TEA_ITEM_ID) {
+                    item.initialStock = setVal;
+                    item.refillStock = 0;
+                }
+            });
+
+            saveData();
+            renderStockTable();
+            renderMenuGrid();
+            closeBulkStockModal();
+            showToast(`Stok awal semua rasa diset ke ${setVal}!`);
+        }
+
+        function resetAllStockPrompt() {
+            if (confirm("Kembalikan seluruh stok rasa ke angka default (50)?")) {
+                menuItems.forEach(item => {
+                    if (item.id !== TEA_ITEM_ID) {
+                        item.initialStock = DEFAULT_INITIAL_STOCK;
+                        item.refillStock = 0;
+                    }
+                });
+                saveData();
+                renderStockTable();
+                renderMenuGrid();
+                showToast("Stok dikembalikan ke angka default.");
+            }
+        }
+
+        // --- STREAMING_CHUNK:Expense Management & Cup Calculation Logic... ---
+        function renderExpenseList() {
+            const container = document.getElementById('expenseListContainer');
+            if (expenses.length === 0) {
+                container.innerHTML = `<div class="text-center py-4 text-slate-400 text-xs">Belum ada rincian pengeluaran.</div>`;
+            } else {
+                container.innerHTML = expenses.map(exp => `
+                    <div class="flex items-center space-x-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                        <input type="text" value="${exp.name}" onchange="updateExpenseName(${exp.id}, this.value)" class="flex-1 p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold outline-none focus:ring-1 focus:ring-brand-500">
+                        <input type="number" value="${exp.amount}" onchange="updateExpenseAmount(${exp.id}, this.value)" class="w-28 p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-red-600 outline-none focus:ring-1 focus:ring-brand-500">
+                        <button onclick="removeExpenseRow(${exp.id})" class="p-1.5 text-red-500 hover:text-red-700 text-xs">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            calculateCupUsage();
+        }
+
+        function addExpenseRow() {
+            expenses.push({ id: Date.now(), name: "Belanja Operational", amount: 0 });
+            saveData();
+            renderExpenseList();
+        }
+
+        function updateExpenseName(id, val) {
+            const exp = expenses.find(e => e.id === id);
+            if (exp) exp.name = val;
+            saveData();
+            calculateShiftRecap();
+        }
+
+        function updateExpenseAmount(id, val) {
+            const exp = expenses.find(e => e.id === id);
+            if (exp) exp.amount = parseFloat(val) || 0;
+            saveData();
+            renderExpenseList();
+            calculateShiftRecap();
+        }
+
+        function removeExpenseRow(id) {
+            expenses = expenses.filter(e => e.id !== id);
+            saveData();
+            renderExpenseList();
+            calculateShiftRecap();
+        }
+
+        function calculateCupUsage() {
+            const modalCup = parseFloat(document.getElementById('inputModalCup').value) || 0;
+            
+            let tehCount = 0;
+            let rasaCount = 0;
+
+            transactions.forEach(tx => {
+                tx.items.forEach(item => {
+                    if (item.id === TEA_ITEM_ID) {
+                        tehCount += item.qty;
+                    } else {
+                        rasaCount += item.qty;
+                    }
+                });
+            });
+
+            document.getElementById('inputTehTerjual').value = tehCount;
+            document.getElementById('inputRasaTerjual').value = rasaCount;
+
+            document.getElementById('displayTehTerjual').textContent = `${tehCount} cup`;
+            document.getElementById('displayRasaTerjual').textContent = `${rasaCount} cup`;
+
+            const totalTerjual = tehCount + rasaCount;
+            document.getElementById('cupTerjualKasir').textContent = `${totalTerjual} cup`;
+
+            const pecah = parseFloat(document.getElementById('inputCupPecah').value) || 0;
+            const totalTerpakai = totalTerjual + pecah;
+            document.getElementById('displayTotalCupTerpakai').textContent = `${totalTerpakai} cup`;
+
+            const sisaCalculated = modalCup - totalTerpakai;
+            document.getElementById('sisaCupFisikCalculated').textContent = `${sisaCalculated} cup`;
+
+            const totalExp = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+            document.getElementById('totalExpenseDisplay').textContent = formatRupiah(totalExp);
+        }
+
+        function onTehTerjualInputChanged() {
+            calculateCupUsage();
+        }
+
+        function onRasaTerjualInputChanged() {
+            calculateCupUsage();
+        }
+
+        // --- STREAMING_CHUNK:Shift Recap & Financial Reconciliation Logic... ---
+        function calculateShiftRecap() {
+            let teaRevenue = 0;
+            let rasaRevenue = 0;
+            let teaTotalCups = 0;
+
+            transactions.forEach(tx => {
+                tx.items.forEach(item => {
+                    if (item.id === TEA_ITEM_ID) {
+                        teaRevenue += item.price * item.qty;
+                        teaTotalCups += item.qty;
+                    } else {
+                        rasaRevenue += item.price * item.qty;
+                    }
+                });
+            });
+
+            const totalOmset = teaRevenue + rasaRevenue;
+            const totalPengeluaran = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+            const uangDiambil = parseFloat(document.getElementById('inputUangDiambil').value) || 0;
+            const uangFisik = parseFloat(document.getElementById('inputUangFisik').value) || 0;
+
+            document.getElementById('recapTeaTotalCups').textContent = `${teaTotalCups} Cup`;
+            document.getElementById('recapTeaTotalRevenue').textContent = formatRupiah(teaRevenue);
+            document.getElementById('recapTeaCupFormula').textContent = `${teaTotalCups} Cup × Rp 3.000 = ${formatRupiah(teaRevenue)}`;
+
+            const tallyVisualEl = document.getElementById('recapTeaTallyVisual');
+            if (teaTotalCups <= 0) {
+                tallyVisualEl.innerHTML = `<span class="text-slate-400 text-xs font-sans italic font-normal">Belum ada penjualan teh per cup tercatat.</span>`;
+            } else {
+                let groups = Math.floor(teaTotalCups / 5);
+                let remainder = teaTotalCups % 5;
+                let html = '';
+                for (let i = 0; i < groups; i++) {
+                    html += `<span class="bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded shadow-xs font-black">||||/</span>`;
+                }
+                if (remainder > 0) {
+                    html += `<span class="bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-bold">${'|'.repeat(remainder)}</span>`;
+                }
+                html += `<span class="text-xs text-slate-500 font-sans ml-1">(${teaTotalCups} cup)</span>`;
+                tallyVisualEl.innerHTML = html;
+            }
+
+            document.getElementById('recapTotalOmset').textContent = formatRupiah(totalOmset);
+            document.getElementById('recapTotalPengeluaran').textContent = formatRupiah(totalPengeluaran);
+
+            document.getElementById('summaryPenjualanTeh').textContent = formatRupiah(teaRevenue);
+            document.getElementById('summaryPenjualanRasa').textContent = formatRupiah(rasaRevenue);
+            document.getElementById('summaryOmset').textContent = formatRupiah(totalOmset);
+            document.getElementById('summaryPengeluaran').textContent = `- ${formatRupiah(totalPengeluaran)}`;
+            document.getElementById('summaryDiambil').textContent = `- ${formatRupiah(uangDiambil)}`;
+
+            const labaTeoretis = totalOmset - totalPengeluaran - uangDiambil;
+            document.getElementById('summaryLabaTeoretis').textContent = formatRupiah(labaTeoretis);
+
+            const targetFisik = totalOmset - totalPengeluaran - uangDiambil;
+            document.getElementById('summaryTargetFisik').textContent = formatRupiah(targetFisik);
+            document.getElementById('summaryUangFisik').textContent = formatRupiah(uangFisik);
+
+            const selisih = uangFisik - targetFisik;
+            const selisihEl = document.getElementById('summarySelisih');
+            const statusBadge = document.getElementById('recapStatusBadge');
+
+            if (selisih === 0) {
+                selisihEl.textContent = "COCOK (Rp 0)";
+                selisihEl.className = "font-bold text-green-600";
+                statusBadge.textContent = "Kas Cocok";
+                statusBadge.className = "text-xs px-3 py-1 rounded-full bg-green-500 text-white font-bold";
+            } else if (selisih > 0) {
+                selisihEl.textContent = `Surplus +${formatRupiah(selisih)}`;
+                selisihEl.className = "font-bold text-blue-600";
+                statusBadge.textContent = "Kas Surplus";
+                statusBadge.className = "text-xs px-3 py-1 rounded-full bg-blue-500 text-white font-bold";
+            } else {
+                selisihEl.textContent = `Minus ${formatRupiah(Math.abs(selisih))}`;
+                selisihEl.className = "font-bold text-red-600";
+                statusBadge.textContent = "Kas Minus";
+                statusBadge.className = "text-xs px-3 py-1 rounded-full bg-red-500 text-white font-bold";
+            }
+        }
+
+        function refreshRecapCalculation() {
+            calculateShiftRecap();
+            showToast("Hitungan rekap diperbarui!");
+        }
+
+        function promptResetShift() {
+            document.getElementById('confirmResetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('confirmResetModal').classList.add('hidden');
+        }
+
+        function executeShiftReset() {
+            transactions = [];
+            cart = [];
+            saveData();
+
+            renderCart();
+            renderMenuGrid();
+            renderStockTable();
+            renderTransactionHistory();
+            calculateShiftRecap();
+            closeResetModal();
+
+            showToast("Shift baru berhasil dimulai!");
+        }
+
+        function renderTransactionHistory() {
+            const tbody = document.getElementById('transactionHistoryTable');
+            if (transactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 text-xs">Belum ada transaksi tersimpan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = transactions.map((tx, idx) => {
+                const totalCups = tx.items.reduce((a, b) => a + b.qty, 0);
+                const itemsStr = tx.items.map(i => `${i.name} (${i.qty})`).join(', ');
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-semibold text-slate-600 text-xs">${tx.timestamp}</td>
+                        <td class="p-3 text-xs font-medium text-slate-800 max-w-xs truncate">${itemsStr}</td>
+                        <td class="p-3 text-xs font-bold text-slate-700">${totalCups} cup</td>
+                        <td class="p-3 text-xs font-extrabold text-brand-700">${formatRupiah(tx.totalPrice)}</td>
+                        <td class="p-3 text-center no-print">
+                            <button onclick="deleteTransaction(${tx.id})" class="text-red-500 hover:text-red-700 text-xs font-semibold">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function deleteTransaction(id) {
+            if (confirm("Hapus transaksi ini dari riwayat?")) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                renderTransactionHistory();
+                renderStockTable();
+                renderMenuGrid();
+                calculateShiftRecap();
+                showToast("Transaksi berhasil dihapus.");
+            }
+        }
+
+        // --- STREAMING_CHUNK:Report Export & WhatsApp Sharing logic... ---
+        function generateReportText() {
+            const dateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            let teaRevenue = 0, rasaRevenue = 0, teaCups = 0, rasaCups = 0;
+
+            transactions.forEach(tx => {
+                tx.items.forEach(item => {
+                    if (item.id === TEA_ITEM_ID) {
+                        teaRevenue += item.price * item.qty;
+                        teaCups += item.qty;
+                    } else {
+                        rasaRevenue += item.price * item.qty;
+                        rasaCups += item.qty;
+                    }
+                });
+            });
+
+            const totalOmset = teaRevenue + rasaRevenue;
+            const totalExp = expenses.reduce((a, e) => a + (e.amount || 0), 0);
+            const uangDiambil = parseFloat(document.getElementById('inputUangDiambil').value) || 0;
+            const uangFisik = parseFloat(document.getElementById('inputUangFisik').value) || 0;
+            const targetFisik = totalOmset - totalExp - uangDiambil;
+            const selisih = uangFisik - targetFisik;
+
+            let text = `=== LAPORAN SHIFT WAY'S TEA CLUB ===\n`;
+            text += `Tanggal: ${dateStr}\n\n`;
+            text += `1. PENJUALAN:\n`;
+            text += `   - Teh per Cup: ${teaCups} Cup (${formatRupiah(teaRevenue)})\n`;
+            text += `   - Menu Rasa  : ${rasaCups} Cup (${formatRupiah(rasaRevenue)})\n`;
+            text += `   - TOTAL OMSET: ${formatRupiah(totalOmset)}\n\n`;
+
+            text += `2. PENGELUARAN OPERASIONAL:\n`;
+            expenses.forEach(e => {
+                text += `   - ${e.name}: ${formatRupiah(e.amount)}\n`;
+            });
+            text += `   - TOTAL PENGELUARAN: ${formatRupiah(totalExp)}\n\n`;
+
+            text += `3. REKONSILIASI KAS:\n`;
+            text += `   - Uang Diambil / Kas  : ${formatRupiah(uangDiambil)}\n`;
+            text += `   - Target Uang Fisik    : ${formatRupiah(targetFisik)}\n`;
+            text += `   - Uang Fisik di Laci   : ${formatRupiah(uangFisik)}\n`;
+            text += `   - STATUS SELISIH       : ${selisih === 0 ? 'COCOK' : (selisih > 0 ? 'SURPLUS +' + formatRupiah(selisih) : 'MINUS ' + formatRupiah(Math.abs(selisih)))}\n`;
+
+            return text;
+        }
+
+        function openExportModal() {
+            document.getElementById('reportTextPreview').value = generateReportText();
+            document.getElementById('exportReportModal').classList.remove('hidden');
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportReportModal').classList.add('hidden');
+        }
+
+        function copyReportText() {
+            const txt = generateReportText();
+            const textarea = document.createElement('textarea');
+            textarea.value = txt;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("Laporan berhasil disalin ke clipboard!");
+        }
+
+        function downloadTextReport() {
+            const txt = generateReportText();
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Laporan_Shift_WaysTea_${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+        }
+
+        function shareToWhatsApp() {
+            const txt = encodeURIComponent(generateReportText());
+            window.open(`https://wa.me/?text=${txt}`, '_blank');
+        }
+
+        function downloadPDFReport() {
+            window.print();
+        }
+
+        // --- STREAMING_CHUNK:Calculator Modal Functions... ---
+        let calcVal = "0";
+        function toggleCalculator() {
+            document.getElementById('calculatorModal').classList.toggle('hidden');
+        }
+        function calcNum(n) {
+            if (calcVal === "0" && n !== ".") calcVal = n;
+            else calcVal += n;
+            document.getElementById('calcScreen').textContent = calcVal;
+        }
+        function calcOp(op) {
+            calcVal += ` ${op} `;
+            document.getElementById('calcScreen').textContent = calcVal;
+        }
+        function calcClear() {
+            calcVal = "0";
+            document.getElementById('calcScreen').textContent = "0";
+        }
+        function calcBackspace() {
+            calcVal = calcVal.trim().slice(0, -1);
+            if (!calcVal) calcVal = "0";
+            document.getElementById('calcScreen').textContent = calcVal;
+        }
+        function calcEquals() {
+            try {
+                calcVal = eval(calcVal.replace(/×/g, '*').replace(/÷/g, '/')).toString();
+                document.getElementById('calcScreen').textContent = calcVal;
+            } catch (e) {
+                document.getElementById('calcScreen').textContent = "Error";
+                calcVal = "0";
+            }
+        }
+
+        // Run on load
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
